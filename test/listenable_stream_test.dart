@@ -2,6 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:listenable_stream/listenable_stream.dart';
 
+void _isSingleSubscriptionStream(Stream<dynamic> stream) {
+  expect(stream.isBroadcast, isFalse);
+
+  final listen = () => stream.listen(null);
+  listen();
+  expect(listen, throwsStateError);
+}
+
 void main() {
   group('ListenableToStream', () {
     test('Emit self when calling `notifyListeners()`', () {
@@ -22,6 +30,11 @@ void main() {
       changeNotifier.notifyListeners();
       changeNotifier.notifyListeners();
       changeNotifier.notifyListeners();
+    });
+
+    test('Single-Subscription Stream', () {
+      final stream = ChangeNotifier().toStream();
+      _isSingleSubscriptionStream(stream);
     });
   });
 
@@ -55,6 +68,18 @@ void main() {
       valueNotifier.value = 1;
       valueNotifier.value = 2;
       valueNotifier.value = 3;
+    });
+
+    test('Single-Subscription Stream', () {
+      {
+        final stream = ValueNotifier(0).toValueStream();
+        _isSingleSubscriptionStream(stream);
+      }
+
+      {
+        final stream = ValueNotifier(0).toValueStream(replayValue: true);
+        _isSingleSubscriptionStream(stream);
+      }
     });
   });
 }

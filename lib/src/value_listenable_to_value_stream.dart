@@ -1,7 +1,8 @@
-import 'dart:async';
+import 'dart:async'
+    show MultiStreamController, Stream, StreamController, StreamSubscription;
 
-import 'package:flutter/foundation.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:flutter/foundation.dart' show ValueListenable;
+import 'package:rxdart/rxdart.dart' show ErrorAndStackTrace, ValueStream;
 
 import 'listenable_to_stream.dart';
 
@@ -51,14 +52,12 @@ class ValueListenableStream<T> extends Stream<T> implements ValueStream<T> {
     void Function() onDone,
     bool cancelOnError,
   }) {
+    final getValue = ([void _]) => _valueListenable.value;
+
     if (_replayValue) {
-      _stream ??= _valueListenable
-          .toStream()
-          .map((_) => _valueListenable.value)
-          .shareBehavior(value);
+      _stream ??= _valueListenable.toStream().map(getValue).startWith(getValue);
     } else {
-      _stream ??=
-          _valueListenable.toStream().map((_) => _valueListenable.value);
+      _stream ??= _valueListenable.toStream().map(getValue);
     }
 
     return _stream.listen(
@@ -70,59 +69,59 @@ class ValueListenableStream<T> extends Stream<T> implements ValueStream<T> {
   }
 }
 
-extension _ShareValueExtension<T> on Stream<T> {
-  Stream<T> shareBehavior(T seeded) {
-    final controllers = <MultiStreamController<T>>[];
-    StreamSubscription<T> subscription;
-
-    var latestValue = seeded;
-    var cancel = false;
-    var done = false;
+/// TODO
+extension StartWithExtension<T> on Stream<T> {
+  /// TODO
+  Stream<T> startWith(T Function() seededProvider) {
+    MultiStreamController<T> multiController;
+    StreamSubscription<T> upstreamSubscription;
 
     final listenUpStream = () => listen(
-          (event) {
-            latestValue = event;
-            controllers.forEach((c) => c.addSync(event));
-          },
-          onError: (e, StackTrace st) =>
-              controllers.forEach((c) => c.addErrorSync(e, st)),
+          multiController.addSync,
+          onError: multiController.addErrorSync,
           onDone: () {
-            done = true;
-            subscription = null;
-
-            controllers.forEach((c) {
-              c.onCancel = null;
-              c.closeSync();
-            });
-            controllers.clear();
+            upstreamSubscription = null;
+            multiController.closeSync();
           },
         );
 
-    final onListen = (MultiStreamController<T> controller) {
-      if (cancel) {
-        return controller.closeSync();
-      }
-      controller.addSync(latestValue);
-      if (done) {
-        return controller.closeSync();
+    final onListen = (MultiStreamController<T> c) {
+      if (multiController != null) {
+        return;
       }
 
-      final wasEmpty = controllers.isEmpty;
-      controllers.add(controller);
-      if (wasEmpty) {
-        subscription = listenUpStream();
-      }
+      multiController = c;
+      multiController.addSync(seededProvider());
 
-      controller.onCancel = () {
-        controllers.remove(controller);
-        if (controllers.isEmpty) {
-          subscription?.cancel();
-          subscription = null;
-          cancel = true;
-        }
+      upstreamSubscription = listenUpStream();
+      multiController.onCancel = () {
+        upstreamSubscription?.cancel();
+        upstreamSubscription = null;
       };
     };
 
-    return Stream.multi(onListen, isBroadcast: true);
+    return Stream.multi(onListen, isBroadcast: false).toSingleSubscription();
+  }
+
+  /// TODO
+  Stream<T> toSingleSubscription() {
+    StreamController<T> controller;
+    StreamSubscription<T> subscription;
+
+    controller = StreamController<T>(
+      sync: true,
+      onListen: () {
+        subscription = listen(
+          controller.add,
+          onError: controller.addError,
+          onDone: controller.close,
+        );
+      },
+      onPause: () => subscription.pause(),
+      onResume: () => subscription.resume(),
+      onCancel: () => subscription.cancel(),
+    );
+
+    return controller.stream;
   }
 }
