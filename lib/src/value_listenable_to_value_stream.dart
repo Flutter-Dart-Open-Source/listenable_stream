@@ -1,10 +1,10 @@
-import 'dart:async'
-    show MultiStreamController, Stream, StreamController, StreamSubscription;
+import 'dart:async' show Stream, StreamSubscription;
 
 import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:rxdart/rxdart.dart' show ErrorAndStackTrace, ValueStream;
 
 import 'listenable_to_stream.dart';
+import 'streamx.dart';
 
 /// Convert this [ValueListenable] to a [ValueStream].
 /// The returned [ValueStream] is a Single-Subscription [Stream].
@@ -66,62 +66,5 @@ class ValueListenableStream<T> extends Stream<T> implements ValueStream<T> {
       onDone: onDone,
       cancelOnError: cancelOnError,
     );
-  }
-}
-
-/// TODO
-extension StartWithExtension<T> on Stream<T> {
-  /// TODO
-  Stream<T> startWith(T Function() seededProvider) {
-    MultiStreamController<T> multiController;
-    StreamSubscription<T> upstreamSubscription;
-
-    final listenUpStream = () => listen(
-          multiController.addSync,
-          onError: multiController.addErrorSync,
-          onDone: () {
-            upstreamSubscription = null;
-            multiController.closeSync();
-          },
-        );
-
-    final onListen = (MultiStreamController<T> c) {
-      if (multiController != null) {
-        return;
-      }
-
-      multiController = c;
-      multiController.addSync(seededProvider());
-
-      upstreamSubscription = listenUpStream();
-      multiController.onCancel = () {
-        upstreamSubscription?.cancel();
-        upstreamSubscription = null;
-      };
-    };
-
-    return Stream.multi(onListen, isBroadcast: false).toSingleSubscription();
-  }
-
-  /// TODO
-  Stream<T> toSingleSubscription() {
-    StreamController<T> controller;
-    StreamSubscription<T> subscription;
-
-    controller = StreamController<T>(
-      sync: true,
-      onListen: () {
-        subscription = listen(
-          controller.add,
-          onError: controller.addError,
-          onDone: controller.close,
-        );
-      },
-      onPause: () => subscription.pause(),
-      onResume: () => subscription.resume(),
-      onCancel: () => subscription.cancel(),
-    );
-
-    return controller.stream;
   }
 }

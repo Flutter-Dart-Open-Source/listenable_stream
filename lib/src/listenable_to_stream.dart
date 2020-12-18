@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show Listenable, VoidCallback;
 
 /// Convert this [Listenable] to a [Stream].
 extension ListenableToStream<T extends Listenable> on T {
@@ -11,12 +11,15 @@ extension ListenableToStream<T extends Listenable> on T {
 
     controller = StreamController<T>(
       sync: true,
-      onListen: () => addListener(listener = () => controller.add(this)),
+      onListen: () {
+        listener = () => controller.add(this);
+        addListener(listener);
+      },
       onCancel: () {
         try {
           removeListener(listener);
           listener = null;
-        } catch (_) {}
+        } catch (_ /*Ignore*/) {}
       },
     );
 
