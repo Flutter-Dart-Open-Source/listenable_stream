@@ -7,7 +7,7 @@ extension StartWithExtension<T> on Stream<T> {
   /// Prepends a value to the source [Stream].
   Stream<T> startWith(T Function() seededProvider) {
     final controller = StreamController<T>(sync: true);
-    StreamSubscription subscription;
+    StreamSubscription<T> subscription;
 
     controller.onListen = () {
       controller.add(seededProvider());
