@@ -7,7 +7,7 @@ repository: https://github.com/Flutter-Dart-Open-Source/listenable_stream.git
 issue_tracker: https://github.com/Flutter-Dart-Open-Source/listenable_stream/issues
 
 environment:
-  sdk: ">=2.9.0 <3.0.0"
+  sdk: ">=2.7.0 <3.0.0"
   flutter: ">=1.17.0"
 
 dependencies:
