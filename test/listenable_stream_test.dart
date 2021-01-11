@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:listenable_stream/listenable_stream.dart';
+import 'package:rxdart/rxdart.dart';
 
 void _isSingleSubscriptionStream(Stream<dynamic> stream) {
   expect(stream.isBroadcast, isFalse);
@@ -59,7 +60,7 @@ void main() {
       final valueNotifier = ValueNotifier(0);
       final stream = valueNotifier.toValueStream(replayValue: true);
 
-      expect(stream.value, 0);
+      expect(stream.requireValue, 0);
       expect(
         stream,
         emitsInOrder([0, 1, 2, 3]),

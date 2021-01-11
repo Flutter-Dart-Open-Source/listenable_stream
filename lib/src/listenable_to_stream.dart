@@ -6,18 +6,15 @@ import 'package:flutter/foundation.dart' show Listenable, VoidCallback;
 extension ListenableToStream<T extends Listenable> on T {
   /// Convert this [Listenable] to a [Stream].
   Stream<T> toStream() {
-    StreamController<T> controller;
-    VoidCallback listener;
+    late StreamController<T> controller;
+    VoidCallback? listener;
 
     controller = StreamController<T>(
       sync: true,
-      onListen: () {
-        listener = () => controller.add(this);
-        addListener(listener);
-      },
+      onListen: () => addListener(listener = () => controller.add(this)),
       onCancel: () {
         try {
-          removeListener(listener);
+          removeListener(listener!);
           listener = null;
         } catch (_ /*Ignore*/) {}
       },
