@@ -17,9 +17,9 @@ extension StartWithExtension<T> on Stream<T> {
         onDone: controller.close,
       );
     };
-    controller.onPause = () => subscription?.pause();
-    controller.onResume = () => subscription?.resume();
-    controller.onCancel = () => subscription?.cancel();
+    controller.onPause = () => subscription.pause();
+    controller.onResume = () => subscription.resume();
+    controller.onCancel = () => subscription.cancel();
 
     return controller.stream;
   }
