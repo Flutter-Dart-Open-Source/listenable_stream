@@ -7,6 +7,9 @@
 [![codecov](https://codecov.io/gh/Flutter-Dart-Open-Source/listenable_stream/branch/master/graph/badge.svg?token=6eORcR6Web)](https://codecov.io/gh/Flutter-Dart-Open-Source/listenable_stream)
 [![Flutter Tests](https://github.com/Flutter-Dart-Open-Source/listenable_stream/workflows/Flutter%20Tests/badge.svg)](https://github.com/Flutter-Dart-Open-Source/listenable_stream.git)
 
+- [x] `Listenable` ▶ `Stream<Listenable>`
+- [x] `ValueListenable<T>` ▶ `ValueStream<T>`
+
 ## Listenable.toStream()
 ```dart
 final ChangeNotifier changeNotifier = ChangeNotifier();

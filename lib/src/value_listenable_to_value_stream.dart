@@ -3,8 +3,13 @@ import 'dart:async' show Stream, StreamSubscription;
 import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:rxdart/rxdart.dart' show ErrorAndStackTrace, ValueStream;
 
-import 'listenable_to_stream.dart';
+import 'common.dart';
 import 'streamx.dart';
+
+extension _ValueListenableToStreamExtension<T> on ValueListenable<T> {
+  Stream<T> toStream() =>
+      toStreamWithTransform<ValueListenable<T>, T>(this, (l) => l.value);
+}
 
 /// Convert this [ValueListenable] to a [ValueStream].
 /// The returned [ValueStream] is a Single-Subscription [Stream].
@@ -52,12 +57,11 @@ class ValueListenableStream<T> extends Stream<T> implements ValueStream<T> {
     void Function() onDone,
     bool cancelOnError,
   }) {
-    final getValue = ([void _]) => _valueListenable.value;
-
     if (_replayValue) {
-      _stream ??= _valueListenable.toStream().map(getValue).startWith(getValue);
+      _stream ??=
+          _valueListenable.toStream().startWith(() => _valueListenable.value);
     } else {
-      _stream ??= _valueListenable.toStream().map(getValue);
+      _stream ??= _valueListenable.toStream();
     }
 
     return _stream.listen(
