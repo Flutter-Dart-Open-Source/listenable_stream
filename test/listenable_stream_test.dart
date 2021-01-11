@@ -36,6 +36,28 @@ void main() {
       final stream = ChangeNotifier().toStream();
       _isSingleSubscriptionStream(stream);
     });
+
+    test('Cancel', () async {
+      final changeNotifier = ChangeNotifier();
+      final stream = changeNotifier.toStream();
+
+      final subscription = stream.listen(
+        expectAsync1(
+          (e) => expect(e, changeNotifier),
+          count: 3,
+        ),
+      );
+
+      changeNotifier.notifyListeners();
+      changeNotifier.notifyListeners();
+      changeNotifier.notifyListeners();
+
+      await pumpEventQueue();
+      await subscription.cancel();
+
+      changeNotifier.notifyListeners();
+      changeNotifier.notifyListeners();
+    });
   });
 
   group('ValueListenableToStream', () {
@@ -79,6 +101,54 @@ void main() {
       {
         final stream = ValueNotifier(0).toValueStream(replayValue: true);
         _isSingleSubscriptionStream(stream);
+      }
+    });
+
+    test('Cancel', () async {
+      {
+        final valueNotifier = ValueNotifier(0);
+        final stream = valueNotifier.toValueStream();
+
+        var i = 1;
+        final subscription = stream.listen(
+          expectAsync1(
+            (e) => expect(e, i++),
+            count: 3,
+          ),
+        );
+
+        valueNotifier.value = 1;
+        valueNotifier.value = 2;
+        valueNotifier.value = 3;
+
+        await pumpEventQueue();
+        await subscription.cancel();
+
+        valueNotifier.value = 4;
+        valueNotifier.value = 5;
+      }
+
+      {
+        final valueNotifier = ValueNotifier(0);
+        final stream = valueNotifier.toValueStream(replayValue: true);
+
+        var i = 0;
+        final subscription = stream.listen(
+          expectAsync1(
+            (e) => expect(e, i++),
+            count: 4,
+          ),
+        );
+
+        valueNotifier.value = 1;
+        valueNotifier.value = 2;
+        valueNotifier.value = 3;
+
+        await pumpEventQueue();
+        await subscription.cancel();
+
+        valueNotifier.value = 4;
+        valueNotifier.value = 5;
       }
     });
   });
