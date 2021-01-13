@@ -23,7 +23,7 @@ extension ValueListenableToValueStream<T> on ValueListenable<T> {
   ///
   /// If [replayValue] is true, the returned [ValueStream] will replay latest value when listening to it.
   /// Otherwise, it does not.
-  ValueStream<T> toValueStream({bool replayValue = false}) =>
+  ValueListenableStream<T> toValueStream({bool replayValue = false}) =>
       ValueListenableStream<T>(this, replayValue);
 }
 
