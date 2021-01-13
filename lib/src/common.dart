@@ -12,6 +12,7 @@ Stream<R> toStreamWithTransform<T extends Listenable, R>(
   VoidCallback listener;
 
   final onListenOrOnResume = () {
+    assert(listener == null);
     try {
       listenable
           .addListener(listener = () => controller.add(transform(listenable)));
@@ -22,6 +23,7 @@ Stream<R> toStreamWithTransform<T extends Listenable, R>(
 
   final createOnPauseOrOnCancel = ([bool closeOnError = false]) {
     return () {
+      assert(listener != null);
       try {
         listenable.removeListener(listener);
         listener = null;
