@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:listenable_stream/listenable_stream.dart';
@@ -36,6 +38,50 @@ void main() {
     test('Single-Subscription Stream', () {
       final stream = ChangeNotifier().toStream();
       _isSingleSubscriptionStream(stream);
+    });
+
+    test('Cancel', () async {
+      final changeNotifier = ChangeNotifier();
+      final stream = changeNotifier.toStream();
+
+      final subscription = stream.listen(
+        expectAsync1(
+          (e) => expect(e, changeNotifier),
+          count: 3,
+        ),
+      );
+
+      changeNotifier.notifyListeners();
+      changeNotifier.notifyListeners();
+      changeNotifier.notifyListeners();
+
+      await pumpEventQueue();
+      await subscription.cancel();
+
+      changeNotifier.notifyListeners();
+      changeNotifier.notifyListeners();
+    });
+
+    test('Pause resume', () async {
+      final changeNotifier = ChangeNotifier();
+      final stream = changeNotifier.toStream();
+
+      final subscription = stream.listen(
+        expectAsync1(
+          (v) => expect(v, changeNotifier),
+          count: 1,
+        ),
+      )..pause();
+
+      // no effect
+      changeNotifier.notifyListeners();
+      changeNotifier.notifyListeners();
+      changeNotifier.notifyListeners();
+
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      subscription.resume();
+
+      changeNotifier.notifyListeners();
     });
   });
 
@@ -81,6 +127,133 @@ void main() {
         final stream = ValueNotifier(0).toValueStream(replayValue: true);
         _isSingleSubscriptionStream(stream);
       }
+    });
+
+    test('Cancel', () async {
+      {
+        final valueNotifier = ValueNotifier(0);
+        final stream = valueNotifier.toValueStream();
+
+        var i = 1;
+        final subscription = stream.listen(
+          expectAsync1(
+            (e) => expect(e, i++),
+            count: 3,
+          ),
+        );
+
+        valueNotifier.value = 1;
+        valueNotifier.value = 2;
+        valueNotifier.value = 3;
+
+        await pumpEventQueue();
+        await subscription.cancel();
+
+        valueNotifier.value = 4;
+        valueNotifier.value = 5;
+      }
+
+      {
+        final valueNotifier = ValueNotifier(0);
+        final stream = valueNotifier.toValueStream(replayValue: true);
+
+        var i = 0;
+        final subscription = stream.listen(
+          expectAsync1(
+            (e) => expect(e, i++),
+            count: 4,
+          ),
+        );
+
+        valueNotifier.value = 1;
+        valueNotifier.value = 2;
+        valueNotifier.value = 3;
+
+        await pumpEventQueue();
+        await subscription.cancel();
+
+        valueNotifier.value = 4;
+        valueNotifier.value = 5;
+      }
+    });
+
+    group('Pause resume', () {
+      test('not replay', () async {
+        final valueNotifier = ValueNotifier(0);
+        final stream = valueNotifier.toValueStream();
+        final expected = 4;
+
+        final subscription = stream.listen(
+          expectAsync1(
+            (v) => expect(v, expected),
+            count: 1,
+          ),
+        )..pause();
+
+        // no effect
+        valueNotifier.value = 1;
+        valueNotifier.value = 2;
+        valueNotifier.value = 3;
+
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        subscription.resume();
+
+        valueNotifier.value = expected;
+      });
+
+      test('replay + pause immediately', () async {
+        final valueNotifier = ValueNotifier(0);
+        final stream = valueNotifier.toValueStream(replayValue: true);
+        final expected = [0, 4, 5];
+
+        var i = 0;
+        final subscription = stream.listen(
+          expectAsync1(
+            (v) => expect(v, expected[i++]),
+            count: expected.length,
+            max: expected.length,
+          ),
+        )..pause();
+
+        // no effect
+        valueNotifier.value = 1;
+        valueNotifier.value = 2;
+        valueNotifier.value = 3;
+
+        subscription.resume();
+
+        await pumpEventQueue();
+        valueNotifier.value = 4;
+        valueNotifier.value = 5;
+      });
+
+      test('replay + pause after events queue.', () async {
+        final valueNotifier = ValueNotifier(0);
+        final stream = valueNotifier.toValueStream(replayValue: true);
+        final expected = [0, 4, 5];
+
+        var i = 0;
+        final subscription = stream.listen(
+          expectAsync1(
+            (v) => expect(v, expected[i++]),
+            count: expected.length,
+            max: expected.length,
+          ),
+        );
+
+        await pumpEventQueue();
+        subscription.pause();
+
+        // no effect
+        valueNotifier.value = 1;
+        valueNotifier.value = 2;
+        valueNotifier.value = 3;
+
+        subscription.resume();
+
+        valueNotifier.value = 4;
+        valueNotifier.value = 5;
+      });
     });
   });
 }
