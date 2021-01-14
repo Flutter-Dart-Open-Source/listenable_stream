@@ -1,4 +1,4 @@
-## 0.0.2 - Jan 12, 2021
+## 0.0.2 - Jan 15, 2021
 
 -   Internal refactor
 
