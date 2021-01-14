@@ -8,10 +8,10 @@ Stream<R> toStreamWithTransform<T extends Listenable, R>(
   T listenable,
   R Function(T) transform,
 ) {
-  late StreamController<R> controller;
+  final controller = StreamController<R>();
   VoidCallback? listener;
 
-  final onListenOrOnResume = () {
+  controller.onListen = () {
     assert(listener == null);
     try {
       listenable
@@ -21,26 +21,15 @@ Stream<R> toStreamWithTransform<T extends Listenable, R>(
     }
   };
 
-  final createOnPauseOrOnCancel = ([bool closeOnError = false]) {
+  controller.onCancel = () {
     return () {
       assert(listener != null);
       try {
         listenable.removeListener(listener!);
         listener = null;
-      } catch (_ /*Ignore*/) {
-        if (identical(closeOnError, true)) {
-          controller.close();
-        }
-      }
+      } catch (_ /*Ignore*/) {}
     };
   };
-
-  controller = StreamController<R>(
-    onListen: onListenOrOnResume,
-    onPause: createOnPauseOrOnCancel(true),
-    onResume: onListenOrOnResume,
-    onCancel: createOnPauseOrOnCancel(),
-  );
 
   return controller.stream;
 }

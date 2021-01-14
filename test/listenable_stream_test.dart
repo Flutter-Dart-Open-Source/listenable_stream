@@ -69,11 +69,11 @@ void main() {
       final subscription = stream.listen(
         expectAsync1(
           (v) => expect(v, changeNotifier),
-          count: 1,
+          count: 4,
         ),
       )..pause();
 
-      // no effect
+      // buffer
       changeNotifier.notifyListeners();
       changeNotifier.notifyListeners();
       changeNotifier.notifyListeners();
@@ -181,16 +181,17 @@ void main() {
       test('not replay', () async {
         final valueNotifier = ValueNotifier(0);
         final stream = valueNotifier.toValueStream();
-        final expected = 4;
+        final expected = [1, 2, 3, 4, 5];
 
+        var i = 0;
         final subscription = stream.listen(
           expectAsync1(
-            (v) => expect(v, expected),
-            count: 1,
+            (v) => expect(v, expected[i++]),
+            count: expected.length,
           ),
         )..pause();
 
-        // no effect
+        // buffer
         valueNotifier.value = 1;
         valueNotifier.value = 2;
         valueNotifier.value = 3;
@@ -198,13 +199,14 @@ void main() {
         await Future<void>.delayed(const Duration(milliseconds: 50));
         subscription.resume();
 
-        valueNotifier.value = expected;
+        valueNotifier.value = 4;
+        valueNotifier.value = 5;
       });
 
       test('replay + pause immediately', () async {
         final valueNotifier = ValueNotifier(0);
         final stream = valueNotifier.toValueStream(replayValue: true);
-        final expected = [0, 4, 5];
+        final expected = [0, 1, 2, 3, 4, 5];
 
         var i = 0;
         final subscription = stream.listen(
@@ -215,14 +217,13 @@ void main() {
           ),
         )..pause();
 
-        // no effect
+        // buffer
         valueNotifier.value = 1;
         valueNotifier.value = 2;
         valueNotifier.value = 3;
 
         subscription.resume();
 
-        await pumpEventQueue();
         valueNotifier.value = 4;
         valueNotifier.value = 5;
       });
@@ -230,7 +231,7 @@ void main() {
       test('replay + pause after events queue.', () async {
         final valueNotifier = ValueNotifier(0);
         final stream = valueNotifier.toValueStream(replayValue: true);
-        final expected = [0, 4, 5];
+        final expected = [0, 1, 2, 3, 4, 5];
 
         var i = 0;
         final subscription = stream.listen(
@@ -244,7 +245,7 @@ void main() {
         await pumpEventQueue();
         subscription.pause();
 
-        // no effect
+        // buffer
         valueNotifier.value = 1;
         valueNotifier.value = 2;
         valueNotifier.value = 3;
