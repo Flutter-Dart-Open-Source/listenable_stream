@@ -1,8 +1,7 @@
 import 'dart:async' show Stream, StreamSubscription;
 
 import 'package:flutter/foundation.dart' show ValueListenable;
-import 'package:rxdart/rxdart.dart' show ValueStream;
-import 'package:rxdart/src/utils/value_wrapper.dart';
+import 'package:rxdart/rxdart.dart' show ValueStream, ValueWrapper;
 
 import 'common.dart';
 import 'streamx.dart';
