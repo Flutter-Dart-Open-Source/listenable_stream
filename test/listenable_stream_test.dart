@@ -89,6 +89,14 @@ void main() {
 
       changeNotifier.notifyListeners();
     });
+
+    test('Emits done when Listenable.addListener throws', () {
+      final changeNotifier = ChangeNotifier()..dispose();
+      expect(
+        changeNotifier.toStream(),
+        emitsDone,
+      );
+    });
   });
 
   group('ValueListenableToStream', () {
@@ -268,6 +276,26 @@ void main() {
         valueNotifier.value = 4;
         valueNotifier.value = 5;
       });
+    });
+
+    test(
+        'Emits done when ValueNotifier.addListener throws and not replay value',
+        () {
+      final valueNotifier = ValueNotifier(0)..dispose();
+      expect(
+        valueNotifier.toValueStream(),
+        emitsDone,
+      );
+    });
+
+    test(
+        'Emits value and done when ValueNotifier.addListener throws and replay value',
+        () {
+      final valueNotifier = ValueNotifier(0)..dispose();
+      expect(
+        valueNotifier.toValueStream(replayValue: true),
+        emitsInOrder([0, emitsDone]),
+      );
     });
   });
 }
