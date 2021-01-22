@@ -10,7 +10,9 @@
 - [x] `Listenable` ▶ `Stream<Listenable>`
 - [x] `ValueListenable<T>` ▶ `ValueStream<T>`
 
-## Listenable.toStream()
+## Usage
+
+### Listenable.toStream()
 ```dart
 final ChangeNotifier changeNotifier = ChangeNotifier();
 final Stream<ChangeNotifier> stream = changeNotifier.toStream();
@@ -20,10 +22,10 @@ changeNotifier.notifyListeners();
 changeNotifier.notifyListeners();
 ```
 
-## ValueListenable.toValueStream()
+### ValueListenable.toValueStream()
 ```dart
 final ValueNotifier<int> valueNotifier = ValueNotifier(0);
-final ValueStream<int> stream = valueNotifier.toValueStream();
+final ValueListenableStream<int> stream = valueNotifier.toValueStream();
 stream.listen(print); // prints 1, 2
 
 valueNotifier.value = 1;
@@ -31,13 +33,17 @@ valueNotifier.value = 2;
 print(stream.value); // prints 2
 ```
 
-## ValueListenable.toValueStream(replay: true)
+### ValueListenable.toValueStream(replayValue: true)
 ```dart
 final ValueNotifier<int> valueNotifier = ValueNotifier(0);
-final ValueStream<int> stream = valueNotifier.toValueStream(replay: true);
+final ValueListenableStream<int> stream = valueNotifier.toValueStream(replayValue: true);
 stream.listen(print); // prints 0, 1, 2
 
 valueNotifier.value = 1;
 valueNotifier.value = 2;
 print(stream.value); // prints 2
 ```
+
+### Note
+-   All returned Stream is **single-subscription `Stream`** (ie. it can only be listened once) and does emits any errors.
+-   `ValueListenableStream` always has value (ie. has no error). 
