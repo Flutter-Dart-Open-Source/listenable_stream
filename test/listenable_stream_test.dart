@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:listenable_stream/listenable_stream.dart';
+import 'package:rxdart/rxdart.dart';
+
+// ignore_for_file: invalid_use_of_protected_member
 
 void _isSingleSubscriptionStream(Stream<dynamic> stream) {
   expect(stream.isBroadcast, isFalse);
@@ -14,7 +17,7 @@ void _isSingleSubscriptionStream(Stream<dynamic> stream) {
 
 void main() {
   group('ListenableToStream', () {
-    test('Emit self when calling `notifyListeners()`', () {
+    test('Emit self when calling `notifyListeners()`', () async {
       final changeNotifier = ChangeNotifier();
       final stream = changeNotifier.toStream();
 
@@ -47,6 +50,7 @@ void main() {
         expectAsync1(
           (e) => expect(e, changeNotifier),
           count: 3,
+          max: 3,
         ),
       );
 
@@ -59,6 +63,8 @@ void main() {
 
       changeNotifier.notifyListeners();
       changeNotifier.notifyListeners();
+
+      assert(!changeNotifier.hasListeners);
     });
 
     test('Pause resume', () async {
@@ -68,11 +74,12 @@ void main() {
       final subscription = stream.listen(
         expectAsync1(
           (v) => expect(v, changeNotifier),
-          count: 1,
+          count: 4,
+          max: 4,
         ),
       )..pause();
 
-      // no effect
+      // buffer
       changeNotifier.notifyListeners();
       changeNotifier.notifyListeners();
       changeNotifier.notifyListeners();
@@ -82,10 +89,18 @@ void main() {
 
       changeNotifier.notifyListeners();
     });
+
+    test('Emits done when Listenable.addListener throws', () {
+      final changeNotifier = ChangeNotifier()..dispose();
+      expect(
+        changeNotifier.toStream(),
+        emitsDone,
+      );
+    });
   });
 
   group('ValueListenableToStream', () {
-    test('Emits changed value when calling `value` setter', () {
+    test('Emits changed value when calling `value` setter', () async {
       final valueNotifier = ValueNotifier(0);
       final stream = valueNotifier.toValueStream();
 
@@ -101,11 +116,11 @@ void main() {
     });
 
     test('Replay value and emits changed value when calling `value` setter',
-        () {
+        () async {
       final valueNotifier = ValueNotifier(0);
       final stream = valueNotifier.toValueStream(replayValue: true);
 
-      expect(stream.value, 0);
+      expect(stream.requireValue, 0);
       expect(
         stream,
         emitsInOrder([0, 1, 2, 3]),
@@ -138,6 +153,7 @@ void main() {
           expectAsync1(
             (e) => expect(e, i++),
             count: 3,
+            max: 3,
           ),
         );
 
@@ -150,6 +166,8 @@ void main() {
 
         valueNotifier.value = 4;
         valueNotifier.value = 5;
+
+        assert(!valueNotifier.hasListeners);
       }
 
       {
@@ -161,6 +179,7 @@ void main() {
           expectAsync1(
             (e) => expect(e, i++),
             count: 4,
+            max: 4,
           ),
         );
 
@@ -173,6 +192,8 @@ void main() {
 
         valueNotifier.value = 4;
         valueNotifier.value = 5;
+
+        assert(!valueNotifier.hasListeners);
       }
     });
 
@@ -180,30 +201,7 @@ void main() {
       test('not replay', () async {
         final valueNotifier = ValueNotifier(0);
         final stream = valueNotifier.toValueStream();
-        final expected = 4;
-
-        final subscription = stream.listen(
-          expectAsync1(
-            (v) => expect(v, expected),
-            count: 1,
-          ),
-        )..pause();
-
-        // no effect
-        valueNotifier.value = 1;
-        valueNotifier.value = 2;
-        valueNotifier.value = 3;
-
-        await Future<void>.delayed(const Duration(milliseconds: 50));
-        subscription.resume();
-
-        valueNotifier.value = expected;
-      });
-
-      test('replay + pause immediately', () async {
-        final valueNotifier = ValueNotifier(0);
-        final stream = valueNotifier.toValueStream(replayValue: true);
-        final expected = [0, 4, 5];
+        final expected = [1, 2, 3, 4, 5];
 
         var i = 0;
         final subscription = stream.listen(
@@ -214,14 +212,39 @@ void main() {
           ),
         )..pause();
 
-        // no effect
+        // buffer
+        valueNotifier.value = 1;
+        valueNotifier.value = 2;
+        valueNotifier.value = 3;
+
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        subscription.resume();
+
+        valueNotifier.value = 4;
+        valueNotifier.value = 5;
+      });
+
+      test('replay + pause immediately', () async {
+        final valueNotifier = ValueNotifier(0);
+        final stream = valueNotifier.toValueStream(replayValue: true);
+        final expected = [0, 1, 2, 3, 4, 5];
+
+        var i = 0;
+        final subscription = stream.listen(
+          expectAsync1(
+            (v) => expect(v, expected[i++]),
+            count: expected.length,
+            max: expected.length,
+          ),
+        )..pause();
+
+        // buffer
         valueNotifier.value = 1;
         valueNotifier.value = 2;
         valueNotifier.value = 3;
 
         subscription.resume();
 
-        await pumpEventQueue();
         valueNotifier.value = 4;
         valueNotifier.value = 5;
       });
@@ -229,7 +252,7 @@ void main() {
       test('replay + pause after events queue.', () async {
         final valueNotifier = ValueNotifier(0);
         final stream = valueNotifier.toValueStream(replayValue: true);
-        final expected = [0, 4, 5];
+        final expected = [0, 1, 2, 3, 4, 5];
 
         var i = 0;
         final subscription = stream.listen(
@@ -243,7 +266,7 @@ void main() {
         await pumpEventQueue();
         subscription.pause();
 
-        // no effect
+        // buffer
         valueNotifier.value = 1;
         valueNotifier.value = 2;
         valueNotifier.value = 3;
@@ -253,6 +276,26 @@ void main() {
         valueNotifier.value = 4;
         valueNotifier.value = 5;
       });
+    });
+
+    test(
+        'Emits done when ValueNotifier.addListener throws and not replay value',
+        () {
+      final valueNotifier = ValueNotifier(0)..dispose();
+      expect(
+        valueNotifier.toValueStream(),
+        emitsDone,
+      );
+    });
+
+    test(
+        'Emits value and done when ValueNotifier.addListener throws and replay value',
+        () {
+      final valueNotifier = ValueNotifier(0)..dispose();
+      expect(
+        valueNotifier.toValueStream(replayValue: true),
+        emitsInOrder([0, emitsDone]),
+      );
     });
   });
 }
