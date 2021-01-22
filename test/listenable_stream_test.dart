@@ -297,5 +297,15 @@ void main() {
         emitsInOrder([0, emitsDone]),
       );
     });
+
+    test('Has no error', () {
+      expect(() => ValueNotifier(0).toValueStream().requireError,
+          throwsA(anything));
+
+      expect(
+        () => ValueNotifier(0).toValueStream(replayValue: true).requireError,
+        throwsA(anything),
+      );
+    });
   });
 }
