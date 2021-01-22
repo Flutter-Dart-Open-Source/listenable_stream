@@ -22,13 +22,11 @@ Stream<R> toStreamWithTransform<T extends Listenable, R>(
   };
 
   controller.onCancel = () {
-    return () {
-      assert(listener != null);
-      try {
-        listenable.removeListener(listener!);
-        listener = null;
-      } catch (_ /*Ignore*/) {}
-    };
+    assert(listener != null);
+    try {
+      listenable.removeListener(listener!);
+      listener = null;
+    } catch (_ /*Ignore*/) {}
   };
 
   return controller.stream;

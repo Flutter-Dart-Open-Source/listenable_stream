@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:listenable_stream/listenable_stream.dart';
 import 'package:rxdart/rxdart.dart';
 
+// ignore_for_file: invalid_use_of_protected_member
+
 void _isSingleSubscriptionStream(Stream<dynamic> stream) {
   expect(stream.isBroadcast, isFalse);
 
@@ -15,7 +17,7 @@ void _isSingleSubscriptionStream(Stream<dynamic> stream) {
 
 void main() {
   group('ListenableToStream', () {
-    test('Emit self when calling `notifyListeners()`', () {
+    test('Emit self when calling `notifyListeners()`', () async {
       final changeNotifier = ChangeNotifier();
       final stream = changeNotifier.toStream();
 
@@ -48,6 +50,7 @@ void main() {
         expectAsync1(
           (e) => expect(e, changeNotifier),
           count: 3,
+          max: 3,
         ),
       );
 
@@ -60,6 +63,8 @@ void main() {
 
       changeNotifier.notifyListeners();
       changeNotifier.notifyListeners();
+
+      assert(!changeNotifier.hasListeners);
     });
 
     test('Pause resume', () async {
@@ -70,6 +75,7 @@ void main() {
         expectAsync1(
           (v) => expect(v, changeNotifier),
           count: 4,
+          max: 4,
         ),
       )..pause();
 
@@ -86,7 +92,7 @@ void main() {
   });
 
   group('ValueListenableToStream', () {
-    test('Emits changed value when calling `value` setter', () {
+    test('Emits changed value when calling `value` setter', () async {
       final valueNotifier = ValueNotifier(0);
       final stream = valueNotifier.toValueStream();
 
@@ -102,7 +108,7 @@ void main() {
     });
 
     test('Replay value and emits changed value when calling `value` setter',
-        () {
+        () async {
       final valueNotifier = ValueNotifier(0);
       final stream = valueNotifier.toValueStream(replayValue: true);
 
@@ -139,6 +145,7 @@ void main() {
           expectAsync1(
             (e) => expect(e, i++),
             count: 3,
+            max: 3,
           ),
         );
 
@@ -151,6 +158,8 @@ void main() {
 
         valueNotifier.value = 4;
         valueNotifier.value = 5;
+
+        assert(!valueNotifier.hasListeners);
       }
 
       {
@@ -162,6 +171,7 @@ void main() {
           expectAsync1(
             (e) => expect(e, i++),
             count: 4,
+            max: 4,
           ),
         );
 
@@ -174,6 +184,8 @@ void main() {
 
         valueNotifier.value = 4;
         valueNotifier.value = 5;
+
+        assert(!valueNotifier.hasListeners);
       }
     });
 
@@ -188,6 +200,7 @@ void main() {
           expectAsync1(
             (v) => expect(v, expected[i++]),
             count: expected.length,
+            max: expected.length,
           ),
         )..pause();
 
