@@ -14,15 +14,20 @@ Stream<R> toStreamWithTransform<T extends Listenable, R>(
   controller.onListen = () {
     assert(listener == null);
     try {
-      listenable
-          .addListener(listener = () => controller.add(transform(listenable)));
+      final l = () => controller.add(transform(listenable));
+      listenable.addListener(l);
+      listener = l;
     } catch (_ /*Ignore*/) {
       controller.close();
     }
   };
 
   controller.onCancel = () {
-    assert(listener != null);
+    if (listener == null) {
+      // addListener thrown error.
+      return;
+    }
+
     try {
       listenable.removeListener(listener!);
       listener = null;
