@@ -1,3 +1,7 @@
+## 1.0.0-nullsafety.0 - Jan 23, 2021
+
+-   Bugfixes: cancel `StreamSubscription` not remove listener.
+
 ## 0.1.0-nullsafety.0 - Jan 15, 2021
 
 -   Migrate this package to null safety.
