@@ -45,5 +45,5 @@ print(stream.value); // prints 2
 ```
 
 ### Note
--   All returned Stream is **single-subscription `Stream`** (ie. it can only be listened once) and does emits any errors.
+-   All returned Stream is **single-subscription `Stream`** (ie. it can only be listened once) and does not emits any errors.
 -   `ValueListenableStream` always has value (ie. has no error). 
