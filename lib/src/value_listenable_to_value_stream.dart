@@ -61,8 +61,7 @@ class ValueListenableStream<T> extends Stream<T> implements ValueStream<T> {
   bool get isBroadcast => false;
 
   @override
-  Never get errorAndStackTrace =>
-      throw StateError('This Stream always has no error!');
+  Null get errorAndStackTrace => null;
 
   @override
   ValueWrapper<T> get valueWrapper => ValueWrapper(_valueListenable.value);

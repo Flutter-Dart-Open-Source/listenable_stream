@@ -3,4 +3,3 @@ linter:
   rules:
     - prefer_final_locals
     - prefer_relative_imports
-    - public_member_api_docs

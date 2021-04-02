@@ -1,3 +1,7 @@
+## 1.0.0 - Apr 02, 2021
+
+-   Stable release for null safety.
+
 ## 1.0.0-nullsafety.1 - Jan 23, 2021
 
 -   Fix docs.
