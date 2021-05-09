@@ -104,6 +104,8 @@ void main() {
       final stream = valueNotifier.toValueStream();
 
       expect(stream.value, 0);
+      expect(stream.valueOrNull, 0);
+      expect(stream.hasValue, isTrue);
       expect(
         stream,
         emitsInOrder([1, 2, 3]),
@@ -120,6 +122,8 @@ void main() {
       final stream = valueNotifier.toValueStream(replayValue: true);
 
       expect(stream.value, 0);
+      expect(stream.valueOrNull, 0);
+      expect(stream.hasValue, isTrue);
       expect(
         stream,
         emitsInOrder([0, 1, 2, 3]),
@@ -298,15 +302,23 @@ void main() {
     });
 
     test('Has no error', () {
+      final notReplay = () => ValueNotifier(0).toValueStream();
       expect(
-        () => ValueNotifier(0).toValueStream().error,
+        () => notReplay().error,
         throwsA(anything),
       );
+      expect(notReplay().errorOrNull, isNull);
+      expect(notReplay().stackTrace, isNull);
+      expect(notReplay().hasError, isFalse);
 
+      final replay = () => ValueNotifier(0).toValueStream(replayValue: true);
       expect(
-        () => ValueNotifier(0).toValueStream(replayValue: true).error,
+        () => replay().error,
         throwsA(anything),
       );
+      expect(replay().errorOrNull, isNull);
+      expect(replay().stackTrace, isNull);
+      expect(replay().hasError, isFalse);
     });
   });
 }
