@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:listenable_stream/listenable_stream.dart';
-import 'package:rxdart/rxdart.dart';
 
 // ignore_for_file: invalid_use_of_protected_member
 
@@ -105,6 +104,8 @@ void main() {
       final stream = valueNotifier.toValueStream();
 
       expect(stream.value, 0);
+      expect(stream.valueOrNull, 0);
+      expect(stream.hasValue, isTrue);
       expect(
         stream,
         emitsInOrder([1, 2, 3]),
@@ -120,7 +121,9 @@ void main() {
       final valueNotifier = ValueNotifier(0);
       final stream = valueNotifier.toValueStream(replayValue: true);
 
-      expect(stream.requireValue, 0);
+      expect(stream.value, 0);
+      expect(stream.valueOrNull, 0);
+      expect(stream.hasValue, isTrue);
       expect(
         stream,
         emitsInOrder([0, 1, 2, 3]),
@@ -299,15 +302,23 @@ void main() {
     });
 
     test('Has no error', () {
+      final notReplay = () => ValueNotifier(0).toValueStream();
       expect(
-        () => ValueNotifier(0).toValueStream().requireError,
+        () => notReplay().error,
         throwsA(anything),
       );
+      expect(notReplay().errorOrNull, isNull);
+      expect(notReplay().stackTrace, isNull);
+      expect(notReplay().hasError, isFalse);
 
+      final replay = () => ValueNotifier(0).toValueStream(replayValue: true);
       expect(
-        () => ValueNotifier(0).toValueStream(replayValue: true).requireError,
+        () => replay().error,
         throwsA(anything),
       );
+      expect(replay().errorOrNull, isNull);
+      expect(replay().stackTrace, isNull);
+      expect(replay().hasError, isFalse);
     });
   });
 }

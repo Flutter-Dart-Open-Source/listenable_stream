@@ -1,7 +1,7 @@
 import 'dart:async' show Stream, StreamSubscription;
 
 import 'package:flutter/foundation.dart' show ValueListenable;
-import 'package:rxdart/rxdart.dart' show ValueStream, ValueWrapper;
+import 'package:rxdart/rxdart.dart' show ValueStream, ValueStreamError;
 
 import 'common.dart';
 import 'streamx.dart';
@@ -61,8 +61,23 @@ class ValueListenableStream<T> extends Stream<T> implements ValueStream<T> {
   bool get isBroadcast => false;
 
   @override
-  Null get errorAndStackTrace => null;
+  Never get error => throw ValueStreamError.hasNoError();
 
   @override
-  ValueWrapper<T> get valueWrapper => ValueWrapper(_valueListenable.value);
+  Null get errorOrNull => null;
+
+  @override
+  bool get hasError => false;
+
+  @override
+  Null get stackTrace => null;
+
+  @override
+  bool get hasValue => true;
+
+  @override
+  T get value => _valueListenable.value;
+
+  @override
+  T get valueOrNull => _valueListenable.value;
 }
