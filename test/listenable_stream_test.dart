@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:listenable_stream/listenable_stream.dart';
-import 'package:rxdart/rxdart.dart';
 
 // ignore_for_file: invalid_use_of_protected_member
 
@@ -120,7 +119,7 @@ void main() {
       final valueNotifier = ValueNotifier(0);
       final stream = valueNotifier.toValueStream(replayValue: true);
 
-      expect(stream.requireValue, 0);
+      expect(stream.value, 0);
       expect(
         stream,
         emitsInOrder([0, 1, 2, 3]),
@@ -300,12 +299,12 @@ void main() {
 
     test('Has no error', () {
       expect(
-        () => ValueNotifier(0).toValueStream().requireError,
+        () => ValueNotifier(0).toValueStream().error,
         throwsA(anything),
       );
 
       expect(
-        () => ValueNotifier(0).toValueStream(replayValue: true).requireError,
+        () => ValueNotifier(0).toValueStream(replayValue: true).error,
         throwsA(anything),
       );
     });
