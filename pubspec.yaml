@@ -10,7 +10,7 @@ environment:
   flutter: '>=1.17.0'
 
 dependencies:
-  rxdart: ^0.27.2
+  rxdart: ^0.27.3
   flutter:
     sdk: flutter
 
