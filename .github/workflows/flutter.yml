@@ -3,33 +3,44 @@ name: Flutter Tests
 on:
   push:
     branches: [ master ]
+    paths-ignore: [ '**.md' ]
   pull_request:
     branches: [ master ]
+    paths-ignore: [ '**.md' ]
+  schedule:
+      # Runs at 02:00 UTC on the 1, 4, 7, 10, 13, 16, 19, 22, 25, 28 and 31st of every month.
+    - cron: "0 2 */3 * *"
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        channel: [ 'stable', 'beta' ]
 
     steps:
       - uses: actions/checkout@v2
 
       - uses: subosito/flutter-action@v1.5.3
         with:
-          channel: 'stable'
+          channel: ${{ matrix.channel }}
 
       - name: Doctor
         run: flutter doctor
 
       - name: Install dependencies
         run: flutter packages get
-      
+
       - name: Format
+        if: ${{ matrix.channel == 'stable' }}
         run: flutter format lib test --set-exit-if-changed
-      
+
       - name: Analyze
+        if: ${{ matrix.channel == 'stable' }}
         run: flutter analyze lib test
-      
+
       - name: Run tests
         run: flutter test --coverage --coverage-path=lcov.info
-      
-      - uses: codecov/codecov-action@v1
+
+      - uses: codecov/codecov-action@v2.1.0
