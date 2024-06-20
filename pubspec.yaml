@@ -4,6 +4,8 @@ version: 1.1.0
 homepage: https://github.com/Flutter-Dart-Open-Source/listenable_stream.git
 repository: https://github.com/Flutter-Dart-Open-Source/listenable_stream.git
 issue_tracker: https://github.com/Flutter-Dart-Open-Source/listenable_stream/issues
+funding:
+  - https://www.buymeacoffee.com/hoc081098
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -19,4 +21,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-flutter:
+topics:
+  - rxdart
+  - hoc081098
+  - reactive-programming
+  - bloc
+  - state-management

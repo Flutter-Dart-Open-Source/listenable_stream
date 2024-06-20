@@ -6,9 +6,11 @@ import 'package:flutter_disposebag/flutter_disposebag.dart';
 import 'package:listenable_stream/listenable_stream.dart';
 import 'package:rxdart_ext/state_stream.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -26,18 +28,18 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('listenable_stream example'),
+        title: const Text('listenable_stream example'),
       ),
       body: Center(
         child: ElevatedButton.icon(
-          label: Text('GO'),
+          label: const Text('GO'),
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => MainPage()),
+              MaterialPageRoute(builder: (context) => const MainPage()),
             );
           },
-          icon: Icon(Icons.home),
+          icon: const Icon(Icons.home),
         ),
       ),
     );
@@ -45,8 +47,10 @@ class MyHomePage extends StatelessWidget {
 }
 
 class MainPage extends StatefulWidget {
+  const MainPage({Key? key}) : super(key: key);
+
   @override
-  _MainPageState createState() => _MainPageState();
+  State<MainPage> createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> with DisposeBagMixin {
@@ -79,7 +83,7 @@ class _MainPageState extends State<MainPage> with DisposeBagMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Main'),
+        title: const Text('Main'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
