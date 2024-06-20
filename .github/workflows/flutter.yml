@@ -20,9 +20,9 @@ jobs:
         channel: [ 'stable', 'beta' ]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2.8.0
+      - uses: subosito/flutter-action@v2.16.0
         with:
           channel: ${{ matrix.channel }}
 
@@ -34,11 +34,11 @@ jobs:
 
       - name: Format
         if: ${{ matrix.channel == 'stable' }}
-        run: flutter format lib test --set-exit-if-changed
+        run: dart format lib test example --set-exit-if-changed
 
       - name: Analyze
         if: ${{ matrix.channel == 'stable' }}
-        run: flutter analyze lib test
+        run: flutter analyze lib test example
 
       - name: Run tests
         run: flutter test --coverage --coverage-path=lcov.info

@@ -31,7 +31,9 @@ dependencies:
   disposebag: ^1.5.1
   flutter_disposebag: ^1.1.0
   flutter_bloc_pattern: ^3.0.0
+
 dev_dependencies:
+  flutter_lints: ^4.0.0
   flutter_test:
     sdk: flutter
 
