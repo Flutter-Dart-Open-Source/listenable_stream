@@ -1,4 +1,8 @@
-### 2.0.0 - Jun 20, 2024
+## 2.0.1 - Jun 20, 2024
+
+- Fix CHANGELOG.
+
+## 2.0.0 - Jun 20, 2024
 
 - Update dependencies:
     - `rxdart` to `^0.28.0`.
