@@ -58,7 +58,7 @@ class ValueListenableStream<T> extends Stream<T> implements ValueStream<T> {
     );
   }
 
-  /// Always return `false`.
+  /// Always returns `false`.
   @override
   bool get isBroadcast => false;
 
@@ -66,31 +66,31 @@ class ValueListenableStream<T> extends Stream<T> implements ValueStream<T> {
   @override
   Never get error => throw ValueStreamError.hasNoError();
 
-  /// Always return `null`.
+  /// Always returns `null`.
   @override
   Null get errorOrNull => null;
 
-  /// Always return `false`.
+  /// Always returns `false`.
   @override
   bool get hasError => false;
 
-  /// Always return `null`.
+  /// Always returns `null`.
   @override
   Null get stackTrace => null;
 
-  /// Always return `true`.
+  /// Always returns `true`.
   @override
   bool get hasValue => true;
 
-  /// Always return the latest value.
+  /// Always returns the latest value.
   @override
   T get value => _valueListenable.value;
 
-  /// Always return the latest value.
+  /// Always returns the latest value.
   @override
   T get valueOrNull => _valueListenable.value;
 
-  /// Always return a [DataNotification] with the latest value.
+  /// Always returns a [DataNotification] with the latest value.
   @override
   DataNotification<T> get lastEventOrNull =>
       DataNotification<T>(_valueListenable.value);
