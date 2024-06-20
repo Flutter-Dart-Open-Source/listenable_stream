@@ -1,6 +1,15 @@
-include: package:pedantic/analysis_options.1.11.0.yaml
+include: package:flutter_lints/flutter.yaml
+analyzer:
+  language:
+    strict-casts: true
+    strict-raw-types: true
 linter:
   rules:
+    - public_member_api_docs
     - prefer_final_locals
     - prefer_relative_imports
-    - public_member_api_docs
+    # https://github.com/dart-lang/lints#migrating-from-packagepedantic
+    - always_declare_return_types
+    - prefer_single_quotes
+    - unawaited_futures
+    - unsafe_html

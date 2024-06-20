@@ -1,5 +1,1 @@
-include: package:pedantic/analysis_options.1.11.0.yaml
-linter:
-  rules:
-    - prefer_final_locals
-    - prefer_relative_imports
+include: package:flutter_lints/flutter.yaml

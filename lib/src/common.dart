@@ -13,7 +13,7 @@ Stream<R> toStreamWithTransform<T extends Listenable, R>(
 
   controller.onListen = () {
     try {
-      final l = () => controller.add(transform(listenable));
+      void l() => controller.add(transform(listenable));
       listenable.addListener(l);
       listener = l;
     } catch (_ /*Ignore*/) {

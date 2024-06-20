@@ -3,13 +3,14 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:listenable_stream/listenable_stream.dart';
+import 'package:rxdart/rxdart.dart';
 
 // ignore_for_file: invalid_use_of_protected_member
 
 void _isSingleSubscriptionStream(Stream<dynamic> stream) {
   expect(stream.isBroadcast, isFalse);
 
-  final listen = () => stream.listen(null);
+  StreamSubscription<void> listen() => stream.listen(null);
   listen();
   expect(listen, throwsStateError);
 }
@@ -105,6 +106,7 @@ void main() {
 
       expect(stream.value, 0);
       expect(stream.valueOrNull, 0);
+      expect(stream.lastEventOrNull, StreamNotification.data(0));
       expect(stream.hasValue, isTrue);
       expect(
         stream,
@@ -123,6 +125,7 @@ void main() {
 
       expect(stream.value, 0);
       expect(stream.valueOrNull, 0);
+      expect(stream.lastEventOrNull, StreamNotification.data(0));
       expect(stream.hasValue, isTrue);
       expect(
         stream,
@@ -302,7 +305,8 @@ void main() {
     });
 
     test('Has no error', () {
-      final notReplay = () => ValueNotifier(0).toValueStream();
+      ValueListenableStream<int> notReplay() =>
+          ValueNotifier(0).toValueStream();
       expect(
         () => notReplay().error,
         throwsA(anything),
@@ -311,7 +315,8 @@ void main() {
       expect(notReplay().stackTrace, isNull);
       expect(notReplay().hasError, isFalse);
 
-      final replay = () => ValueNotifier(0).toValueStream(replayValue: true);
+      ValueListenableStream<int> replay() =>
+          ValueNotifier(0).toValueStream(replayValue: true);
       expect(
         () => replay().error,
         throwsA(anything),

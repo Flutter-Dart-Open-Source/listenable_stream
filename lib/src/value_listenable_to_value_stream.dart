@@ -1,7 +1,8 @@
 import 'dart:async' show Stream, StreamSubscription;
 
 import 'package:flutter/foundation.dart' show ValueListenable;
-import 'package:rxdart/rxdart.dart' show ValueStream, ValueStreamError;
+import 'package:rxdart/rxdart.dart'
+    show ValueStream, ValueStreamError, DataNotification;
 
 import 'common.dart';
 import 'streamx.dart';
@@ -57,27 +58,40 @@ class ValueListenableStream<T> extends Stream<T> implements ValueStream<T> {
     );
   }
 
+  /// Always return `false`.
   @override
   bool get isBroadcast => false;
 
+  /// Always throw [ValueStreamError.hasNoError].
   @override
   Never get error => throw ValueStreamError.hasNoError();
 
+  /// Always return `null`.
   @override
   Null get errorOrNull => null;
 
+  /// Always return `false`.
   @override
   bool get hasError => false;
 
+  /// Always return `null`.
   @override
   Null get stackTrace => null;
 
+  /// Always return `true`.
   @override
   bool get hasValue => true;
 
+  /// Always return the latest value.
   @override
   T get value => _valueListenable.value;
 
+  /// Always return the latest value.
   @override
   T get valueOrNull => _valueListenable.value;
+
+  /// Always return a [DataNotification] with the latest value.
+  @override
+  DataNotification<T> get lastEventOrNull =>
+      DataNotification<T>(_valueListenable.value);
 }

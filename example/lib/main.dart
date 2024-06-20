@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc_pattern/flutter_bloc_pattern.dart';
+import 'package:flutter_disposebag/flutter_disposebag.dart';
 import 'package:listenable_stream/listenable_stream.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:rxdart_ext/state_stream.dart';
 
 void main() => runApp(MyApp());
 
@@ -47,14 +49,15 @@ class MainPage extends StatefulWidget {
   _MainPageState createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _MainPageState extends State<MainPage> with DisposeBagMixin {
   final controller = TextEditingController();
-  late final StreamSubscription<String> subscription;
+  late final StateStream<String> stateStream;
 
   @override
   void initState() {
     super.initState();
-    subscription = controller
+
+    stateStream = controller
         .toValueStream(replayValue: true)
         .map((event) => event.text)
         .debounceTime(const Duration(milliseconds: 500))
@@ -62,12 +65,12 @@ class _MainPageState extends State<MainPage> {
         .distinct()
         .switchMap((value) => Stream.periodic(
             const Duration(milliseconds: 500), (i) => '$value..$i'))
-        .listen(print);
+        .publishState('initial')
+      ..connect().disposedBy(bag);
   }
 
   @override
   void dispose() {
-    subscription.cancel();
     controller.dispose();
     super.dispose();
   }
@@ -86,6 +89,19 @@ class _MainPageState extends State<MainPage> {
             TextField(
               controller: controller,
               decoration: const InputDecoration(filled: true),
+            ),
+            Expanded(
+              child: RxStreamBuilder<String>(
+                stream: stateStream,
+                builder: (context, state) {
+                  return Center(
+                    child: Text(
+                      state,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),
