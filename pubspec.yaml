@@ -1,6 +1,6 @@
 name: listenable_stream
 description: Convert Listenable (e.g. ChangeNotifier), ValueListenable(e.g. ValueNotifier) to Stream / ValueStream.
-version: 2.0.0
+version: 2.0.1
 homepage: https://github.com/Flutter-Dart-Open-Source/listenable_stream.git
 repository: https://github.com/Flutter-Dart-Open-Source/listenable_stream.git
 issue_tracker: https://github.com/Flutter-Dart-Open-Source/listenable_stream/issues
